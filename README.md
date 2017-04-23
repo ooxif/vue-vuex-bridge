@@ -57,7 +57,7 @@ export default bridge({
 })
 ```
 
-## usage with beforeRouteEnter() (experimental)
+## usage with beforeRouteEnter()
 
 ```javascript
 import bridge from 'vue-vuex-bridge'
