@@ -1,6 +1,6 @@
 {
   "name": "vue-vuex-bridge",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Maps vuex store state to vue instances dynamically.",
   "author": "oo <oo@xif.at>",
   "license": "MIT",
@@ -10,15 +10,34 @@
     "type": "git",
     "url": "https://github.com/ooxif/vue-vuex-bridge.git"
   },
+  "scripts": {
+    "build": "node scripts/build",
+    "codeclimate": "cat ./coverage/lcov.info | codeclimate-test-reporter",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "lint": "standard",
+    "test": "jest",
+    "test:cover": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!**/__tests__/**"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  },
   "babel": {
     "presets": [
       "latest",
       "stage-0"
     ]
   },
-  "eslintConfig": {
-    "parser": "babel-eslint",
-    "extends": "standard"
+  "standard": {
+    "env": [
+      "jest"
+    ]
   },
   "peerDependencies": {
     "vue": "^2.2.6",
@@ -28,29 +47,19 @@
     "babel-cli": "^6.16.0",
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",
+    "babel-jest": "^19.0.0",
     "babel-preset-latest": "^6.16.0",
     "babel-preset-stage-0": "^6.16.0",
     "babel-register": "^6.16.3",
-    "chai": "^4.0.0-canary.1",
-    "coveralls": "^2.11.14",
+    "codeclimate-test-reporter": "^0.4.1",
+    "coveralls": "^2.13.0",
     "del": "^2.2.2",
-    "eslint-config-standard": "^10.2.1",
-    "istanbul": "^1.1.0-alpha.1",
-    "mocha": "^3.1.2",
-    "rollup": "^0.36.3",
+    "jest": "^19.0.2",
+    "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.6.1",
-    "sinon": "^2.0.0-pre.3",
-    "standard": "^10.0.2"
-  },
-  "scripts": {
-    "lint": "standard",
-    "test": "mocha --compilers js:babel-register",
-    "test:watch": "mocha --compilers js:babel-register --reporter min --watch",
-    "test:cover": "babel-node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "build": "node tools/build",
-    "prepublish": "npm run build",
-    "publish:docs": "easystatic deploy docs --repo kriasoft/babel-starter-kit",
-    "start": "easystatic start docs"
+    "rollup-plugin-replace": "^1.1.1",
+    "standard": "^10.0.2",
+    "vue": "^2.2.6",
+    "vuex": "^2.3.1"
   }
 }

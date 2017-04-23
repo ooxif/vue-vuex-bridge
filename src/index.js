@@ -1,21 +1,21 @@
-const PROP_NAME = '$bridge'
+const DEFAULT_KEY = 'default'
 const MODULE_NAME = 'bridge'
+const PROP_NAME = '$bridge'
+
+function raise (message, arg) {
+  throw new Error(`[vue-vuex-bridge] ${message}`, arg)
+}
+
+function getDefaultKey () {
+  return DEFAULT_KEY
+}
 
 function generateKey (vm, keyGenerator) {
-  if (!keyGenerator) return 'default'
-
   const generatedKey = keyGenerator(vm)
 
-  if (process.env.NODE_ENV !== 'production') {
-    if (typeof generatedKey !== 'string' || generatedKey === '') {
-      // eslint-disable-next-line no-console
-      console.error('Generated key is not valid.', vm)
+  typeof generatedKey !== 'string' && raise('Invalid key', vm)
 
-      return 'default'
-    }
-  }
-
-  return generatedKey
+  return generatedKey || DEFAULT_KEY
 }
 
 function createStateProxy (moduleName, componentName, propName, key) {
@@ -53,10 +53,15 @@ function registerModule (store, moduleName) {
   store.registerModule(moduleName, {
     namespaced: true,
 
-    state: store.state[moduleName] || {},
+    state: Object.assign(
+      Object.create(null),
+      store.state[moduleName] || {}
+    ),
 
     getters: {
-      installed: () => true
+      installed () {
+        return true
+      }
     },
 
     mutations: {
@@ -68,8 +73,19 @@ function registerModule (store, moduleName) {
         }
       },
 
-      replace (state, { componentName, storeKey, value }) {
-        state[componentName][storeKey] = value
+      replace (state, { componentName, storeKey, value, $delete }) {
+        const prevValue = state[componentName][storeKey]
+
+        const keys = Object.keys(value)
+        const { length } = keys
+
+        for (let i = 0; i < length; i += 1) {
+          const key = keys[i]
+
+          if (!(key in prevValue)) $delete(prevValue, key)
+        }
+
+        Object.assign(prevValue, value)
       },
 
       mutate (state, { componentName, storeKey, key, value }) {
@@ -79,17 +95,18 @@ function registerModule (store, moduleName) {
   })
 }
 
-export default function bridge (options) {
-  const opts = options || {}
-  const moduleName = opts.moduleName || MODULE_NAME
-  const propName = opts.propName || PROP_NAME
-  const componentState = opts.state || {}
-  const removeOnDestroy = !!opts.removeOnDestroy
+export default function bridge (options = {}) {
+  const moduleName = options.moduleName || MODULE_NAME
+  const propName = options.propName || PROP_NAME
+  const componentState = options.state || {}
+  const keyGenerator = options.key || getDefaultKey
+  const removeOnDestroy = !!options.removeOnDestroy
   let componentName
-  let keyGenerator
 
   function initState (store, storeKey) {
-    if (!store.getters[`${moduleName}/installed`]) registerModule(store, moduleName)
+    if (!store.getters[`${moduleName}/installed`]) {
+      registerModule(store, moduleName)
+    }
 
     const { state } = store
 
@@ -100,7 +117,7 @@ export default function bridge (options) {
       store.commit(`${moduleName}/initialize`, {
         componentName,
         storeKey,
-        set: store._vm.$set, // eslint-disable-line no-underscore-dangle
+        set: store._vm.$set,
         value: { ...componentState }
       })
     }
@@ -114,39 +131,31 @@ export default function bridge (options) {
       name
     } = componentOptions
 
-    if (!name) {
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.error('name must be set.', componentOptions)
-      }
-
-      return componentOptions
-    }
+    !name && raise('name must be set', componentOptions)
 
     componentName = name
-    keyGenerator = componentOptions.key
 
     componentOptions.computed = {
       ...(computed || {}),
-      ...transformState(moduleName, componentName, propName, Object.keys(componentState))
+      ...transformState(
+        moduleName,
+        componentName,
+        propName,
+        Object.keys(componentState)
+      )
     }
 
     componentOptions.beforeCreate = function beforeCreateHook () {
       const { $store } = this
 
-      if ($store) {
-        const storeKey = generateKey(this, keyGenerator)
+      !$store && raise('Vuex is not installed', componentOptions)
 
-        if (storeKey) {
-          initState($store, storeKey)
-          this[propName] = storeKey
-        }
-      } else if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.error('this.$store must be set.', componentOptions)
-      }
+      const storeKey = generateKey(this, keyGenerator)
 
-      if (beforeCreate) beforeCreate.call(this)
+      initState($store, storeKey)
+      this[propName] = storeKey
+
+      beforeCreate && beforeCreate.call(this)
     }
 
     if (removeOnDestroy) {
@@ -157,7 +166,7 @@ export default function bridge (options) {
           this.$delete(this.$store.state[moduleName][componentName], storeKey)
         }
 
-        if (destroyed) destroyed.call(this)
+        destroyed && destroyed.call(this)
       }
     }
 
@@ -167,8 +176,6 @@ export default function bridge (options) {
   func.getStore = function getStore (store) {
     const storeKey = generateKey(this, keyGenerator)
 
-    if (!storeKey) return null
-
     initState(store, storeKey)
 
     return {
@@ -176,13 +183,18 @@ export default function bridge (options) {
         store.commit(`${moduleName}/replace`, {
           componentName,
           storeKey,
-          value: newState
+          value: newState,
+          $delete: store._vm.$delete
         })
       },
 
       state: store.state[moduleName][componentName][storeKey]
     }
   }
+
+  func.key = keyGenerator
+  func.moduleName = moduleName
+  func.propName = propName
 
   return func
 }
