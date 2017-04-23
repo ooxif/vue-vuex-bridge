@@ -1,6 +1,6 @@
 {
   "name": "vue-vuex-bridge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Maps vuex store state to vue instances dynamically.",
   "author": "oo <oo@xif.at>",
   "license": "MIT",
