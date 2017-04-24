@@ -6,6 +6,7 @@
 [![CircleCI Status](https://circleci.com/gh/ooxif/vue-vuex-bridge.svg?style=shield)](https://circleci.com/gh/ooxif/vue-vuex-bridge)
 [![Coverage Status](https://img.shields.io/coveralls/ooxif/vue-vuex-bridge/master.svg)](https://coveralls.io/github/ooxif/vue-vuex-bridge?branch=master)
 [![Code Climate Status](https://codeclimate.com/github/ooxif/vue-vuex-bridge.svg)](https://codeclimate.com/github/ooxif/vue-vuex-bridge)
+[![codecov](https://codecov.io/gh/ooxif/vue-vuex-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/ooxif/vue-vuex-bridge)
 [![Dependency Status](https://david-dm.org/ooxif/vue-vuex-bridge.svg)](https://david-dm.org/ooxif/vue-vuex-bridge)
 [![devDependency Status](https://david-dm.org/ooxif/vue-vuex-bridge/dev-status.svg)](https://david-dm.org/ooxif/vue-vuex-bridge/?type=dev)
 [![peerDependency Status](https://david-dm.org/ooxif/vue-vuex-bridge/peer-status.svg)](https://david-dm.org/ooxif/vue-vuex-bridge/?type=peer)
