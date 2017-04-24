@@ -16,6 +16,7 @@ script:
 after_success:
   - yarn codeclimate
   - yarn coveralls
+  - yarn codecov
 
 addons:
   code_climate:
