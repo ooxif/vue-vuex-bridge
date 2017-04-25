@@ -5,7 +5,6 @@ import bridge from '../'
 Vue.use(Vuex)
 
 Vue.config.errorHandler = function (err) {
-  console.log('err', err)
   throw err
 }
 
