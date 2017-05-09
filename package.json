@@ -40,7 +40,7 @@
     ]
   },
   "peerDependencies": {
-    "vue": "^2.2.6",
+    "vue": "^2.3.2",
     "vuex": "^2.3.1"
   },
   "devDependencies": {
@@ -60,7 +60,7 @@
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-replace": "^1.1.1",
     "standard": "^10.0.2",
-    "vue": "^2.2.6",
+    "vue": "^2.3.2",
     "vuex": "^2.3.1"
   }
 }
