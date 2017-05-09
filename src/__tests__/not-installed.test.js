@@ -5,7 +5,7 @@ Vue.config.errorHandler = function (err) {
   throw err
 }
 
-xtest('not-installed', () => {
+test('not-installed', () => {
   const options = bridge()({
     name: 'test',
     template: '<span />'
