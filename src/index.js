@@ -17,7 +17,7 @@ function generateKey (vm, keyGenerator) {
     `key() returned an invalid value (typeof ${typeof generatedKey})`
   )
 
-  return generatedKey || DEFAULT_KEY
+  return generatedKey
 }
 
 function createStateProxy (moduleName, componentName, propName, key) {
