@@ -2,8 +2,8 @@ const DEFAULT_KEY = 'default'
 const MODULE_NAME = 'bridge'
 const PROP_NAME = '$bridge'
 
-function raise (message, arg) {
-  throw new Error(`[vue-vuex-bridge] ${message}`, arg)
+function raise (message) {
+  throw new Error(`[vue-vuex-bridge] ${message}`)
 }
 
 function getDefaultKey () {
@@ -13,7 +13,9 @@ function getDefaultKey () {
 function generateKey (vm, keyGenerator) {
   const generatedKey = keyGenerator(vm)
 
-  typeof generatedKey !== 'string' && raise('Invalid key', vm)
+  typeof generatedKey !== 'string' && raise(
+    `key() returned an invalid value (typeof ${typeof generatedKey})`
+  )
 
   return generatedKey || DEFAULT_KEY
 }
@@ -131,7 +133,7 @@ export default function bridge (options = {}) {
       name
     } = componentOptions
 
-    !name && raise('name must be set', componentOptions)
+    !name && raise('name must be set')
 
     componentName = name
 
@@ -148,12 +150,16 @@ export default function bridge (options = {}) {
     componentOptions.beforeCreate = function beforeCreateHook () {
       const { $store } = this
 
-      !$store && raise('Vuex is not installed', componentOptions)
+      !$store && raise('Vuex is not installed')
 
       const storeKey = generateKey(this, keyGenerator)
 
       initState($store, storeKey)
-      this[propName] = storeKey
+
+      Object.defineProperty(this, propName, {
+        __proto__: null,
+        value: storeKey
+      })
 
       beforeCreate && beforeCreate.call(this)
     }
@@ -162,9 +168,7 @@ export default function bridge (options = {}) {
       componentOptions.destroyed = function destroyedHook () {
         const storeKey = this[propName]
 
-        if (storeKey) {
-          this.$delete(this.$store.state[moduleName][componentName], storeKey)
-        }
+        this.$delete(this.$store.state[moduleName][componentName], storeKey)
 
         destroyed && destroyed.call(this)
       }
