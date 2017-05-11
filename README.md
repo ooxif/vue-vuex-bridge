@@ -72,12 +72,12 @@ export default setting({
   name: 'sample-component',
   
   beforeRouteEnter(to, from, next) {
-    const { state, replace } = setting.getStore(store)
+    const { state, assign } = setting.getStore(store)
     
     state.a // 1
     
-    // replace() uses store.commit() internally.
-    replace({ a: 2 })
+    // assign() uses store.commit() internally.
+    assign({ a: 2 })
     
     state.a // 2
   },

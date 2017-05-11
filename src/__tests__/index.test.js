@@ -169,7 +169,7 @@ test('getStore()', () => {
   toBe(store.state[setting.moduleName][name][key].foo, 100)
   toBe(map.state.foo, 100)
 
-  map.replace({ foo: 200 })
+  map.assign({ foo: 200 })
 
   toBe(store.state[setting.moduleName][name][key].foo, 200)
   toBe(map.state.foo, 200)

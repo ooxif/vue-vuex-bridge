@@ -67,6 +67,21 @@ function registerModule (store, moduleName) {
     },
 
     mutations: {
+      assign (state, payload) {
+        const prevState = state[payload.componentName][payload.storeKey]
+        const { values } = payload
+        const keys = Object.keys(values)
+        const { length } = keys
+
+        for (let i = 0; i < length; i += 1) {
+          const key = keys[i]
+
+          if (key in prevState) {
+            prevState[key] = values[key]
+          }
+        }
+      },
+
       initialize (state, { componentName, set, storeKey, value }) {
         if (!(componentName in state)) {
           set(state, componentName, { [storeKey]: value })
@@ -75,23 +90,8 @@ function registerModule (store, moduleName) {
         }
       },
 
-      replace (state, { componentName, storeKey, value, $delete }) {
-        const prevValue = state[componentName][storeKey]
-
-        const keys = Object.keys(value)
-        const { length } = keys
-
-        for (let i = 0; i < length; i += 1) {
-          const key = keys[i]
-
-          if (!(key in prevValue)) $delete(prevValue, key)
-        }
-
-        Object.assign(prevValue, value)
-      },
-
-      mutate (state, { componentName, storeKey, key, value }) {
-        state[componentName][storeKey][key] = value
+      mutate (state, pl) {
+        state[pl.componentName][pl.storeKey][pl.key] = pl.value
       }
     }
   })
@@ -183,12 +183,11 @@ export default function bridge (options = {}) {
     initState(store, storeKey)
 
     return {
-      replace (newState) {
-        store.commit(`${moduleName}/replace`, {
+      assign (values) {
+        store.commit(`${moduleName}/assign`, {
+          values,
           componentName,
-          storeKey,
-          value: newState,
-          $delete: store._vm.$delete
+          storeKey
         })
       },
 
