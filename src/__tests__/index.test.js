@@ -97,6 +97,34 @@ test('destroyed', () => {
   toBe(store.state[setting.moduleName][name][key], undefined)
 })
 
+test('destroyed to be called', () => {
+  const store = createStore()
+  const name = 'test'
+  const setting = bridge({
+    removeOnDestroy: true,
+    state: {
+      foo: 100
+    }
+  })
+
+  const destroyed = jest.fn()
+
+  const vm = new Vue(setting({
+    destroyed,
+    name,
+    store
+  }))
+
+  const key = setting.key()
+
+  toBe(store.state[setting.moduleName][name][key].foo, 100)
+
+  vm.$destroy()
+
+  toBe(store.state[setting.moduleName][name][key], undefined)
+  expect(destroyed).toHaveBeenCalledTimes(1)
+})
+
 test('setter', () => {
   const store = createStore()
   const name = 'test'
@@ -169,10 +197,12 @@ test('getStore()', () => {
   toBe(store.state[setting.moduleName][name][key].foo, 100)
   toBe(map.state.foo, 100)
 
-  map.assign({ foo: 200 })
+  map.assign({ foo: 200, bar: 300 })
 
   toBe(store.state[setting.moduleName][name][key].foo, 200)
   toBe(map.state.foo, 200)
+  toBe(store.state[setting.moduleName][name][key].bar, undefined)
+  toBe(map.state.bar, undefined)
 })
 
 test('2 components * 2 instances', () => {
@@ -264,4 +294,47 @@ test('2 components * 2 instances', () => {
   toBe(store.state[setting2.moduleName][name2][key21].foo, 201)
   toBe(vm22.foo, 200)
   toBe(store.state[setting2.moduleName][name2][key22].foo, 200)
+})
+
+test('2 instances share same state', () => {
+  const store = createStore()
+  const name = 'test1'
+  const setting = bridge({
+    state: {
+      foo: 100
+    }
+  })
+  const options = setting({ name, store })
+
+  const vm1 = new Vue(options)
+
+  const key = vm1[setting.propName]
+
+  toBe(vm1.foo, 100)
+  toBe(store.state[setting.moduleName][name][key].foo, 100)
+
+  vm1.foo = 200
+
+  toBe(vm1.foo, 200)
+  toBe(store.state[setting.moduleName][name][key].foo, 200)
+
+  const vm2 = new Vue(options)
+
+  toBe(vm2.foo, 200)
+
+  vm2.foo = 300
+
+  toBe(vm1.foo, 300)
+  toBe(vm2.foo, 300)
+  toBe(store.state[setting.moduleName][name][key].foo, 300)
+})
+
+test('invalid key', () => {
+  toThrow(() => new Vue(bridge({
+    key: () => 1,
+    state: { foo: 100 }
+  })({
+    name: 'test',
+    store: createStore()
+  })))
 })
